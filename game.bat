@@ -12,7 +12,7 @@ if errorlevel 1 (
 
 REM Run
 echo Running SnakeGame...
-cd code
+cd game1
 ..\\java\bin\java SnakeGame
 cd ..
 
