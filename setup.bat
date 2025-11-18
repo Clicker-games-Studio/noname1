@@ -1,5 +1,5 @@
 @echo off
-title Setup - Fetch and Extract
+title Setup - Fetch and Extract Java
 setlocal
 
 REM ===============================
@@ -33,5 +33,13 @@ REM ===============================
 echo EXTRACTING java.zip into %EXTRACT_FOLDER%...
 powershell -Command "Expand-Archive -Path 'java.zip' -DestinationPath '%EXTRACT_FOLDER%' -Force"
 
-echo DONE!
+REM ===============================
+REM Step 5: Test Java version
+REM ===============================
+echo.
+echo TESTING JAVA...
+"%EXTRACT_FOLDER%\bin\java.exe" -version
+
+echo.
+echo SETUP COMPLETE!
 pause
