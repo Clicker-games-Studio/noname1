@@ -39,20 +39,7 @@ REM ===============================
 echo.
 echo TESTING JAVA...
 "%EXTRACT_FOLDER%\bin\java.exe" -version
-pause
 
 echo.
 echo SETUP COMPLETE!
-timeout /t 5 /nobreak >nul
-@echo off
-title Snake Game Test
-echo Compiling SnakeGame...
-java\bin\javac code\SnakeGame.java
-if errorlevel 1 (
-    echo Compilation failed!
-    pause
-    exit /b
-)
-echo Running SnakeGame...
-java\bin\java code.SnakeGame
 pause
