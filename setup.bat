@@ -22,10 +22,16 @@ $wc.DownloadFileAsync($uri, $destination); ^
 while ($wc.IsBusy) { Start-Sleep -Milliseconds 200 }"
 
 REM ===============================
-REM Step 3: Extract java.zip
+REM Step 3: Create extraction folder
 REM ===============================
-echo EXTRACTING java.zip...
-powershell -Command "Expand-Archive -Path 'java.zip' -DestinationPath '.' -Force"
+set "EXTRACT_FOLDER=java"
+if not exist "%EXTRACT_FOLDER%" mkdir "%EXTRACT_FOLDER%"
+
+REM ===============================
+REM Step 4: Extract java.zip into folder
+REM ===============================
+echo EXTRACTING java.zip into %EXTRACT_FOLDER%...
+powershell -Command "Expand-Archive -Path 'java.zip' -DestinationPath '%EXTRACT_FOLDER%' -Force"
 
 echo DONE!
 pause
