@@ -3,7 +3,7 @@ title Snake Game Test
 
 REM Compile
 echo Compiling SnakeGame...
-java\bin\javac code\SnakeGame.java
+java\bin\javac game1\SnakeGame.java
 if errorlevel 1 (
     echo Compilation failed!
     pause
