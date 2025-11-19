@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.AudioInputStream;
 
 public class SnakeGame extends JPanel implements ActionListener {
 
@@ -59,6 +62,7 @@ public class SnakeGame extends JPanel implements ActionListener {
             try (FileWriter writer = new FileWriter(readme)) {
                 writer.write("# Mods Folder\n\n");
                 writer.write("Place a file named food.png here to replace the apple graphic.\n");
+                writer.write("Place a file named eat.wav here for apple eating sound.\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -98,16 +102,12 @@ public class SnakeGame extends JPanel implements ActionListener {
                 for (String line : lines) {
                     if (line.startsWith("game_speed="))
                         configGameSpeed = Integer.parseInt(line.split("=")[1].trim());
-
                     if (line.startsWith("auto_speed="))
                         configAutoSpeed = Boolean.parseBoolean(line.split("=")[1].trim());
-
                     if (line.startsWith("godmode="))
                         configGodmode = Boolean.parseBoolean(line.split("=")[1].trim());
-
                     if (line.startsWith("exit_on_death="))
                         configExitOnDeath = Boolean.parseBoolean(line.split("=")[1].trim());
-
                     if (line.startsWith("fullscreen="))
                         configFullscreen = Boolean.parseBoolean(line.split("=")[1].trim());
                 }
@@ -132,8 +132,6 @@ public class SnakeGame extends JPanel implements ActionListener {
         if (gamePanel.configFullscreen) {
             frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             frame.setUndecorated(true);
-
-            // Resize the game area to match the monitor
             Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
             gamePanel.WIDTH = screen.width;
             gamePanel.HEIGHT = screen.height;
@@ -212,7 +210,6 @@ public class SnakeGame extends JPanel implements ActionListener {
             x[i] = x[i - 1];
             y[i] = y[i - 1];
         }
-
         switch (direction) {
             case 'U': y[0] -= UNIT_SIZE; break;
             case 'D': y[0] += UNIT_SIZE; break;
@@ -226,6 +223,9 @@ public class SnakeGame extends JPanel implements ActionListener {
             bodyParts++;
             applesEaten++;
             newApple();
+
+            // Play eat sound
+            playSound("mods/eat.wav");
         }
     }
 
@@ -295,25 +295,11 @@ public class SnakeGame extends JPanel implements ActionListener {
         @Override
         public void keyPressed(KeyEvent e) {
             switch (e.getKeyCode()) {
-                case KeyEvent.VK_LEFT:
-                    if (direction != 'R') direction = 'L';
-                    break;
-
-                case KeyEvent.VK_RIGHT:
-                    if (direction != 'L') direction = 'R';
-                    break;
-
-                case KeyEvent.VK_UP:
-                    if (direction != 'D') direction = 'U';
-                    break;
-
-                case KeyEvent.VK_DOWN:
-                    if (direction != 'U') direction = 'D';
-                    break;
-
-                case KeyEvent.VK_R:
-                    if (!running) restartGame();
-                    break;
+                case KeyEvent.VK_LEFT: if (direction != 'R') direction = 'L'; break;
+                case KeyEvent.VK_RIGHT: if (direction != 'L') direction = 'R'; break;
+                case KeyEvent.VK_UP: if (direction != 'D') direction = 'U'; break;
+                case KeyEvent.VK_DOWN: if (direction != 'U') direction = 'D'; break;
+                case KeyEvent.VK_R: if (!running) restartGame(); break;
             }
         }
     }
@@ -330,5 +316,25 @@ public class SnakeGame extends JPanel implements ActionListener {
         y[0] = HEIGHT / 2;
 
         startGame();
+    }
+
+    // ---------------------------------------------------------------
+    // SOUND
+    // ---------------------------------------------------------------
+
+    private void playSound(String soundFile) {
+        try {
+            File file = new File(soundFile);
+            if (file.exists()) {
+                AudioInputStream audioStream = AudioSystem.getAudioInputStream(file);
+                Clip clip = AudioSystem.getClip();
+                clip.open(audioStream);
+                clip.start();
+            } else {
+                System.out.println("Sound file not found: " + soundFile);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
