@@ -20,4 +20,4 @@ cd game1
 ..\\java\bin\java SnakeGame
 cd ..
 
-pause
+exit
