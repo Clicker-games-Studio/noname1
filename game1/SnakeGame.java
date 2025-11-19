@@ -11,9 +11,9 @@ import java.awt.image.BufferedImage;
 
 public class SnakeGame extends JPanel implements ActionListener {
 
-    // Window settings
-    private final int WIDTH = 600;
-    private final int HEIGHT = 600;
+    // Window settings (default)
+    private int WIDTH = 600;
+    private int HEIGHT = 600;
     private final int UNIT_SIZE = 25;
 
     // Config values (default)
@@ -21,11 +21,12 @@ public class SnakeGame extends JPanel implements ActionListener {
     private boolean configAutoSpeed = false;
     private boolean configGodmode = false;
     private boolean configExitOnDeath = false;
+    private boolean configFullscreen = false;
 
     // Game variables
     private int DELAY = 75; // overwritten by config
-    private final int x[] = new int[(WIDTH * HEIGHT) / (UNIT_SIZE * UNIT_SIZE)];
-    private final int y[] = new int[(WIDTH * HEIGHT) / (UNIT_SIZE * UNIT_SIZE)];
+    private int[] x;
+    private int[] y;
     private int bodyParts = 6;
     private int applesEaten;
     private int appleX;
@@ -37,11 +38,13 @@ public class SnakeGame extends JPanel implements ActionListener {
     private BufferedImage foodImage;
 
     public SnakeGame() {
-
-        loadConfig(); // <<< Load or create config.emr09 at startup
+        loadConfig(); // Load or create config.emr09 at startup
         this.DELAY = configGameSpeed;
 
         random = new Random();
+        x = new int[(WIDTH * HEIGHT) / (UNIT_SIZE * UNIT_SIZE)];
+        y = new int[(WIDTH * HEIGHT) / (UNIT_SIZE * UNIT_SIZE)];
+
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
@@ -84,6 +87,7 @@ public class SnakeGame extends JPanel implements ActionListener {
                 writer.write("auto_speed=false\n");
                 writer.write("godmode=false\n");
                 writer.write("exit_on_death=false\n");
+                writer.write("fullscreen=false\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -103,6 +107,9 @@ public class SnakeGame extends JPanel implements ActionListener {
 
                     if (line.startsWith("exit_on_death="))
                         configExitOnDeath = Boolean.parseBoolean(line.split("=")[1].trim());
+
+                    if (line.startsWith("fullscreen="))
+                        configFullscreen = Boolean.parseBoolean(line.split("=")[1].trim());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -119,17 +126,37 @@ public class SnakeGame extends JPanel implements ActionListener {
         System.out.println("Loading Snake Game...");
         try { Thread.sleep(1000); } catch (InterruptedException e) { }
 
-        JFrame frame = new JFrame("Snake Game - Hard Mode");
         SnakeGame gamePanel = new SnakeGame();
+        JFrame frame = new JFrame("Snake Game - Hard Mode");
+
+        if (gamePanel.configFullscreen) {
+            frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            frame.setUndecorated(true);
+
+            // Resize the game area to match the monitor
+            Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+            gamePanel.WIDTH = screen.width;
+            gamePanel.HEIGHT = screen.height;
+            gamePanel.setPreferredSize(screen);
+        } else {
+            frame.setSize(600, 600);
+        }
+
         frame.add(gamePanel);
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
         gamePanel.startGame();
     }
 
     public void startGame() {
+        x = new int[(WIDTH * HEIGHT) / (UNIT_SIZE * UNIT_SIZE)];
+        y = new int[(WIDTH * HEIGHT) / (UNIT_SIZE * UNIT_SIZE)];
+        bodyParts = 6;
+        applesEaten = 0;
+        direction = 'R';
         newApple();
         running = true;
         timer = new Timer(configGameSpeed, this);
@@ -166,8 +193,7 @@ public class SnakeGame extends JPanel implements ActionListener {
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 20));
             g.drawString("Score: " + applesEaten, 10, 25);
-        }
-        else {
+        } else {
             gameOver(g);
         }
     }
@@ -177,8 +203,8 @@ public class SnakeGame extends JPanel implements ActionListener {
     // ---------------------------------------------------------------
 
     private void newApple() {
-        appleX = random.nextInt((WIDTH / UNIT_SIZE)) * UNIT_SIZE;
-        appleY = random.nextInt((HEIGHT / UNIT_SIZE)) * UNIT_SIZE;
+        appleX = random.nextInt(WIDTH / UNIT_SIZE) * UNIT_SIZE;
+        appleY = random.nextInt(HEIGHT / UNIT_SIZE) * UNIT_SIZE;
     }
 
     private void move() {
@@ -204,7 +230,6 @@ public class SnakeGame extends JPanel implements ActionListener {
     }
 
     private void checkCollisions() {
-
         if (!configGodmode) {
             // snake hits itself
             for (int i = bodyParts; i > 0; i--) {
@@ -299,6 +324,11 @@ public class SnakeGame extends JPanel implements ActionListener {
         direction = 'R';
         Arrays.fill(x, 0);
         Arrays.fill(y, 0);
+
+        // Center snake
+        x[0] = WIDTH / 2;
+        y[0] = HEIGHT / 2;
+
         startGame();
     }
 }
